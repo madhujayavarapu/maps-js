@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	  <title>Map</title>
+    <style>
+       #map {
+        height: 600px;
+        width: 100%;
+        position: relative;
+       }
+       
+       #add{
+		   position: fixed;
+		   top: 500px;
+		   left : 95%;
+		   background: #4B4444;
+		   color: #FFFFFF;
+		   width: 50px;
+		   height: 50px;
+		   border-radius: 50px;
+	   }
+	   
+	    #current{
+		   position: fixed;
+		   top: 500px;
+		   left : 3%;
+		   background: #4B4444;
+		   color: #FFFFFF;
+		   width: 50px;
+		   height: 50px;
+		   border-radius: 50px;
+	   }
+	   #search{
+		   width: 200px;
+		   border: 1px solid black;
+		   text-align: center;
+		   font-size: 14px;
+		   height: 30px;
+		   border-radius: 50px;
+	   }
+	   #submit{
+		   width: 100px;
+		   height: 30px;
+		   background: #4D4D4D;
+		   color: white;
+		   border-radius: 50px;
+	   }
+	   #submit:hover{
+		   background: #E5E5E5;
+		   color: black;
+	   }
+    </style>
+  </head>
+  <body onload="currentLocation()">
+	  
+	  
+    <input type="text" name="search" id="search" placeholder="Search Place">&nbsp;&nbsp;&nbsp;&nbsp;
+	<button type="submit" id="submit" onclick="goToPlace()">Submit</button>
+    
+    <div>
+		<div id="map"></div>
+		<button onclick="initMap()" id="current">Current</button>
+		<button onclick = "addUser()" id="add">Add User</button>
+    </div>
+    
+    
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+   
+    <script>
+	  var lats,longs;
+	  var locations=[
+		{lat: 17.7417216, lng: 83.3009082},
+		{lat: 17.6912254, lng: 83.2364169},
+		{lat: 17.7138467, lng: 83.3158063},
+		{lat: 17.7487645, lng: 83.3325002},
+		{lat: 17.7240628, lng: 83.3048966}
+	  
+	  ];
+	  var map;
+	  var mapOptions;
+      function initMap() {
+		
+		  if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(function (p) {
+			
+					
+					//current location lat & lng..
+					
+					LatLng = new google.maps.LatLng(p.coords.latitude, p.coords.longitude);
+					
+					//current lat and lng
+					lats = p.coords.latitude;
+					longs = p.coords.longitude;
+					
+					//Map position..
+					
+					 mapOptions = {
+						center: LatLng,
+						zoom: 16,
+						mapTypeId: google.maps.MapTypeId.ROADMAP
+					};
+					 map = new google.maps.Map(document.getElementById("map"), mapOptions);
+					
+					//Add a marker to the current location.
+					var marker = new google.maps.Marker({
+						position: LatLng,
+						map: map,
+						title: "<div style = 'height:60px;width:200px'><b>Your location:</b><br />Latitude: " + p.coords.latitude + "<br />Longitude: " + p.coords.longitude
+					});
+					fixedMarkers();
+						
+				});
+			}
+			else{
+				alert("GPS is not there.");
+			}
+			
+      }
+      
+      
+      function fixedMarkers(){
+					  
+		  //lables..just like indicators..
+					 
+		  var labels = 'H';
+		  
+		  var markers = locations.map(function(location, i) {
+			  return new google.maps.Marker({
+					position: location,
+					label: labels
+			  });
+		   });
+					
+		  // Add a marker clusterer to manage the markers.
+		  var markerCluster = new MarkerClusterer(map, markers,
+				{imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+		  
+	  }
+      
+      
+      function goToPlace(){
+			var geocoder = new google.maps.Geocoder();
+			var address = document.getElementById('search').value;
+		
+
+			geocoder.geocode( { 'address': address}, function(results, status) {
+
+				if (status == google.maps.GeocoderStatus.OK) {
+					var latitude = results[0].geometry.location.lat();
+					var longitude = results[0].geometry.location.lng();
+					
+					var pos = {lat: latitude, lng: longitude};
+					
+					lats=latitude;
+					longs=longitude;
+					
+						/* map marker part */
+						
+						map = new google.maps.Map(document.getElementById('map'), {
+						  zoom: 14,
+						  center: pos
+						});
+						var marker = new google.maps.Marker({
+						  position: pos,
+						  map: map
+						});	
+						
+						fixedMarkers();	
+				 } 
+			}); 
+		}
+		
+		function addUser(){
+			alert("hi you added the user...");
+			locations.push({lat:lats,lng:longs});
+			fixedMarkers();
+		}
+     
+    </script>
+     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
+    <script async defer
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAcS52skiqBCvLlpZ5Dkm1rh25WQ4-6CIM&callback=initMap">
+    </script>
+    
+  </body>
+</html>
